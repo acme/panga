@@ -9,7 +9,7 @@ use Term::ProgressBar::Simple;
 use Path::Class;
 use Panga;
 use MP3::Tag;
-
+use IPC::Run qw( run timeout );
 
 my $panga = Panga->new;
 
@@ -22,7 +22,6 @@ my $solr = WebService::Solr->new( undef, { autocommit => 0 } );
 
 my @docs;
 foreach my $filename (@filenames) {
-#next unless $filename =~ /Suzuki/;
     my $prefix = file($filename)->relative($root);
 
     my $hash = $panga->get($prefix);
@@ -37,11 +36,15 @@ foreach my $filename (@filenames) {
         $hash->{title_s}  = $title;
         $hash->{artist_s} = $artist;
         $hash->{album_s}  = $album;
-# $title  = encode('utf8', $title);
-# $artist  = encode('utf8', $artist);
-# $album  = encode('utf8', $album);
-#use Devel::Peek; Dump $album;
-warn "$title / $artist / $album";
+    }
+
+    unless ( $hash->{mime_type_s} ) {
+        run [ 'file', '-ib', $filename ], \undef, \my $mime_type, undef,
+            timeout(10)
+            or die "$?";
+        chomp $mime_type;
+        $hash->{mime_type_s} = $mime_type if $mime_type;
+        $progress->message($mime_type);
     }
 
     $panga->put( $prefix, $hash );
