@@ -10,6 +10,7 @@ use Path::Class;
 use Panga;
 use MP3::Tag;
 use IPC::Run qw( run timeout );
+use Digest::MD5::File qw(file_md5_hex);
 
 my $panga = Panga->new;
 
@@ -45,6 +46,12 @@ foreach my $filename (@filenames) {
         chomp $mime_type;
         $hash->{mime_type_s} = $mime_type if $mime_type;
         $progress->message($mime_type);
+    }
+
+    unless ( $hash->{md5_s} ) {
+        my $md5 = file_md5_hex($filename);
+        $hash->{md5_s} = $md5;
+        $progress->message($md5);
     }
 
     $panga->put( $prefix, $hash );
