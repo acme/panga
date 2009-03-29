@@ -11,6 +11,7 @@ use Panga;
 use MP3::Tag;
 use IPC::Run qw( run timeout );
 use Digest::MD5::File qw(file_md5_hex);
+use MP3::Info;
 
 my $panga = Panga->new;
 
@@ -52,6 +53,13 @@ foreach my $filename (@filenames) {
         my $md5 = file_md5_hex($filename);
         $hash->{md5_s} = $md5;
         $progress->message($md5);
+    }
+
+    unless ( $hash->{duration_f} ) {
+        my $info = get_mp3info($filename);
+        $hash->{bitrate_i}   = $info->{BITRATE}   if $info->{BITRATE};
+        $hash->{frequency_f} = $info->{FREQUENCY} if $info->{FREQUENCY};
+        $hash->{duration_f}  = $info->{SECS}      if $info->{SECS};
     }
 
     $panga->put( $prefix, $hash );
