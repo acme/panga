@@ -3,8 +3,6 @@ use strict;
 use warnings;
 use lib 'lib';
 use File::Find::Rule;
-use Text::Roman;
-use WebService::Solr;
 use Term::ProgressBar::Simple;
 use Path::Class;
 use Panga;
@@ -19,8 +17,6 @@ my $root      = '/home/acme/Public/mp3/';
 my @filenames = File::Find::Rule->new->file->in($root);
 
 my $progress = Term::ProgressBar::Simple->new( scalar @filenames );
-
-my $solr = WebService::Solr->new( undef, { autocommit => 0 } );
 
 my @docs;
 foreach my $filename (@filenames) {
