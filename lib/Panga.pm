@@ -1,6 +1,7 @@
 package Panga;
 use Moose;
 use DBI;
+use WebService::Solr;
 
 has 'solr' => (
     is      => 'ro',
